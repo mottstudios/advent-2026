@@ -17,17 +17,16 @@
   color-scheme:dark;
 }
 html,body{height:100%}
-body{margin:0;background:#120d0a;color:var(--paper);font-family:var(--body);overflow:hidden}
+body{margin:0;background:#120d0a;color:var(--paper);font-family:var(--body);overflow:hidden;display:flex;flex-direction:column}
 body::before{content:"";position:fixed;inset:-40px;background:url("2026-advent-calendar-covered.jpg") center/cover;filter:blur(28px) brightness(.45);z-index:0}
 
-.viewport{position:fixed;inset:0;overflow:auto;display:grid;place-items:center;z-index:1;
-  padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px)}
-.stage{position:relative;width:min(100vw,calc(100dvh*16/9));aspect-ratio:16/9;max-width:none;
+.viewport{position:relative;flex:1;min-height:0;overflow:auto;display:grid;place-items:center;z-index:1;container-type:size}
+.stage{position:relative;width:min(100cqw,calc(100cqh*16/9));aspect-ratio:16/9;max-width:none;
   background:url("2026-advent-calendar-uncovered.jpg") center/100% 100% no-repeat;box-shadow:0 20px 80px #000a;
   display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr)}
 @media (max-aspect-ratio:1/1){
   .viewport{place-items:center start}
-  .stage{width:calc(72dvh*16/9)}
+  .stage{width:calc(min(100cqh,560px)*16/9)}
 }
 
 .cell{position:relative;container-type:size}
@@ -54,23 +53,31 @@ body::before{content:"";position:fixed;inset:-40px;background:url("2026-advent-c
   pointer-events:none;opacity:0;transition:opacity .2s;z-index:5}
 .cell.nudge .tip{opacity:1}
 
-.btn{position:fixed;z-index:3;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));
-  background:var(--red);color:#fff;border:0;border-radius:10px;padding:16px 24px;cursor:pointer;
+.btn{flex:none;background:var(--red);color:#fff;border:0;border-radius:10px;padding:16px 24px;cursor:pointer;
   font:800 clamp(14px,1.1vw + 6px,22px)/1 var(--body);letter-spacing:.07em;text-transform:uppercase;
   display:flex;align-items:center;gap:12px;box-shadow:0 3px 0 #6d0a08,0 10px 30px #0008}
 .btn svg{width:1.3em;height:1.3em}
 .btn:hover{background:#e82a24}
 .btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 
-.sheet{position:fixed;z-index:4;left:50%;translate:-50% 0;bottom:calc(14px + env(safe-area-inset-bottom,0px));
-  width:min(560px,calc(100vw - 32px));background:var(--ink);border:1px solid #f3e6c833;border-radius:12px;
-  padding:12px;box-shadow:0 18px 60px #000c;display:grid;gap:10px}
-.sheet header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.sheet header b{font:800 15px/1 var(--body);color:var(--gold);letter-spacing:.04em;text-transform:uppercase}
-.sheet .x{flex:none;background:none;border:1px solid #f3e6c833;color:var(--paper);border-radius:6px;
-  width:30px;height:30px;cursor:pointer;font-size:16px}
-.sheet iframe{width:100%;border:0;border-radius:12px;display:block}
-.sheet a{color:var(--gold);font-size:12px}
+.foot{position:relative;z-index:2;flex:none;display:flex;align-items:center;gap:20px;
+  background:var(--ink);border-top:1px solid #f3e6c833;box-shadow:0 -10px 30px #0007;
+  padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.now{flex:none;display:grid;gap:6px;width:150px}
+.now span{font:600 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#e9d6b0;opacity:.7}
+.now b{font:800 18px/1.1 var(--body);color:var(--gold);text-transform:uppercase;letter-spacing:.03em}
+.slot{flex:1;min-width:0;height:152px;display:grid;place-items:center;border-radius:12px;
+  background:#f3e6c80d;border:1px dashed #f3e6c833}
+.slot:has(iframe){background:none;border:0}
+.slot p{margin:0;font-size:14px;color:#e9d6b0;opacity:.75;text-align:center;padding:0 12px}
+.slot iframe{width:100%;height:152px;border:0;border-radius:12px;display:block}
+@media (max-width:700px){
+  .foot{flex-wrap:wrap;gap:10px}
+  .now{display:none}
+  .slot{flex-basis:100%;order:2}
+  .btn{flex:1;justify-content:center;padding:12px 16px}
+}
 
 @media (prefers-reduced-motion:reduce){
   .cover{transition:none}
@@ -82,14 +89,13 @@ body::before{content:"";position:fixed;inset:-40px;background:url("2026-advent-c
 
 <div class="viewport"><div class="stage" id="stage"></div></div>
 
-<button class="btn" id="plBtn" type="button">
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 6h13v2H3zm0 5h13v2H3zm0 5h9v2H3zm15-6v8.2a2.8 2.8 0 1 1-2-2.7V8h5v2z"/></svg>
-  Advent playlist so far</button>
-
-<div class="sheet" id="sheet" hidden>
-  <header><b id="shHead"></b><button class="x" id="shClose" type="button" aria-label="Close player">✕</button></header>
-  <div id="shBody"></div>
-</div>
+<footer class="foot">
+  <div class="now"><span>Now playing</span><b id="shHead">—</b></div>
+  <div class="slot" id="shBody"><p>Open today's square, then press play.</p></div>
+  <button class="btn" id="plBtn" type="button">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 6h13v2H3zm0 5h13v2H3zm0 5h9v2H3zm15-6v8.2a2.8 2.8 0 1 1-2-2.7V8h5v2z"/></svg>
+    Advent playlist so far</button>
+</footer>
 
 <script>
 const PLAYLIST="4OPDr0vm88He9fG1ciOad2";
@@ -136,23 +142,17 @@ GRID.forEach((day,i)=>{
   stage.appendChild(el);
 });
 
-const sheet=document.getElementById("sheet"),shHead=document.getElementById("shHead"),shBody=document.getElementById("shBody");
-const frame=(src,h)=>`<iframe src="${src}" height="${h}" loading="lazy"
+const shHead=document.getElementById("shHead"),shBody=document.getElementById("shBody");
+const frame=src=>`<iframe src="${src}" height="152"
   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
 function showTrack(day){
   shHead.textContent=`December ${day}`;
-  shBody.innerHTML=frame(`https://open.spotify.com/embed/track/${TRACKS[day-1]}?utm_source=generator&theme=0`,152);
-  sheet.hidden=false;
+  shBody.innerHTML=frame(`https://open.spotify.com/embed/track/${TRACKS[day-1]}?utm_source=generator&theme=0`);
 }
 document.getElementById("plBtn").addEventListener("click",()=>{
-  shHead.textContent="Advent playlist so far";
-  shBody.innerHTML=frame(`https://open.spotify.com/embed/playlist/${PLAYLIST}?utm_source=generator&theme=0`,380)+
-    `<p style="margin:8px 2px 0"><a href="https://open.spotify.com/playlist/${PLAYLIST}" target="_blank" rel="noopener">Open in Spotify</a></p>`;
-  sheet.hidden=false;
+  shHead.textContent="Playlist so far";
+  shBody.innerHTML=frame(`https://open.spotify.com/embed/playlist/${PLAYLIST}?utm_source=generator&theme=0`);
 });
-const close=()=>{sheet.hidden=true;shBody.innerHTML=""};
-document.getElementById("shClose").addEventListener("click",close);
-addEventListener("keydown",e=>{if(e.key==="Escape"&&!sheet.hidden)close()});
 </script>
 </body>
 </html>
