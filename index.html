@@ -57,6 +57,15 @@ body::before{content:"";position:fixed;inset:-40px;background:url("2026-advent-c
   font:800 clamp(14px,1.1vw + 6px,22px)/1 var(--body);letter-spacing:.07em;text-transform:uppercase;
   display:flex;align-items:center;gap:12px;box-shadow:0 3px 0 #6d0a08,0 10px 30px #0008}
 .btn svg{width:1.3em;height:1.3em}
+.btn.thanks{background:#b5601e;box-shadow:0 3px 0 #5a2f0e,0 10px 30px #0008}
+.btn.thanks:hover{background:#c96f28}
+
+/* Pre-December notice, centred on the calendar; clicks pass through to the cells */
+.notice{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:6;pointer-events:none;
+  width:max-content;max-width:min(80%,660px);text-align:center;
+  background:#1b1410e8;color:var(--paper);border:2px solid var(--gold);border-radius:999px;
+  padding:.9em 2.2em;font:600 clamp(13px,1vw + 7px,22px)/1.35 var(--body);box-shadow:0 12px 40px #000c}
+.notice b{display:block;font-weight:800;color:var(--gold);font-size:1.12em;margin-bottom:.2em}
 .btn:hover{background:#e82a24}
 .btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 
@@ -94,7 +103,7 @@ body::before{content:"";position:fixed;inset:-40px;background:url("2026-advent-c
   <div class="slot" id="shBody"><p>Open today's square, then press play.</p></div>
   <button class="btn" id="plBtn" type="button">
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 6h13v2H3zm0 5h13v2H3zm0 5h9v2H3zm15-6v8.2a2.8 2.8 0 1 1-2-2.7V8h5v2z"/></svg>
-    Advent playlist so far</button>
+    <span id="plLabel">Advent playlist so far</span></button>
 </footer>
 
 <script>
@@ -150,8 +159,18 @@ function showTrack(day){
   shHead.textContent=`December ${day}`;
   shBody.innerHTML=frame(`https://open.spotify.com/embed/track/${TRACKS[day-1]}?utm_source=generator&theme=0`);
 }
+// Before Dec 1: Thanksgiving button + centred notice. Flips back automatically on Dec 1.
+const BEFORE=!PREVIEW&&now<new Date(2026,11,1);
+if(BEFORE){
+  document.getElementById("plBtn").classList.add("thanks");
+  document.getElementById("plLabel").textContent="Thanksgiving playlist";
+  const n=document.createElement("div");
+  n.className="notice";
+  n.innerHTML="<b>This Musical Advent Calendar Begins on December 1st.</b>Bookmark it! And until then, enjoy the Thanksgiving playlist!";
+  stage.appendChild(n);
+}
 document.getElementById("plBtn").addEventListener("click",()=>{
-  shHead.textContent="Playlist so far";
+  shHead.textContent=BEFORE?"Thanksgiving playlist":"Playlist so far";
   shBody.innerHTML=frame(`https://open.spotify.com/embed/playlist/${PLAYLIST}?utm_source=generator&theme=0`);
 });
 </script>
