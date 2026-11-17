@@ -115,6 +115,7 @@ const isToday=d=>now.getFullYear()===2026&&now.getMonth()===11&&now.getDate()===
 
 const KEY="advent2026-opened";
 let opened=new Set();
+if(location.hash==="#reset"){try{localStorage.removeItem(KEY)}catch(e){}}
 try{opened=new Set(JSON.parse(localStorage.getItem(KEY)||"[]"))}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...opened]))}catch(e){}};
 
